@@ -213,7 +213,12 @@ def create_app(*, directory: Path | None = None, agent_name: str = "Local SIWC B
 
     @app.get("/")
     def home():
-        return HTMLResponse("<h1>Local SIWC Bridge</h1><p>Use your application to begin pairing.</p>")
+        return HTMLResponse("""<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>
+        <title>Continue with ChatGPT</title><style>body{font:16px system-ui;margin:3rem;max-width:38rem;line-height:1.5}button{font:inherit;padding:.7rem 1rem}p{color:#465}</style>
+        <h1>Continue with ChatGPT</h1><p>This local bridge will open OpenAI's approval page. It stores the resulting credentials only on this computer.</p>
+        <button id=continue>Continue with ChatGPT</button><p id=status></p><script>
+        document.querySelector('#continue').onclick=async()=>{const button=document.querySelector('#continue'),status=document.querySelector('#status');button.disabled=true;status.textContent='Opening secure approval…';try{const response=await fetch('/v1/authorize',{method:'POST'}),value=await response.json();if(!response.ok)throw new Error('Unable to begin pairing.');location.assign(value.authorization_url)}catch(_){button.disabled=false;status.textContent='Unable to begin pairing. Return to the application and try again.'}};
+        </script>""")
 
     @app.get("/v1/status")
     def status():
